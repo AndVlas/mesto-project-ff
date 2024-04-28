@@ -1,27 +1,26 @@
     //Открытие попапа
 function openModal (popup) {
     popup.classList.add('popup_is-opened');
+    document.addEventListener('keydown', handleCloseModalEsc);
 };
 
     //Закрытие попапа
-function closeModal () {
-    const openedPopup = document.querySelector('.popup_is-opened');
-    openedPopup.classList.remove('popup_is-opened');
+function closeModal (popup) {
+    popup.classList.remove('popup_is-opened');
+    document.removeEventListener('keydown', handleCloseModalEsc);
 };
 
     //Закрытие попапа через оверлей и кнопку
-function handleCloseModalOverlayAndButton (evt) {
-    const openedPopup = document.querySelector('.popup_is-opened');
-    const popupCloseButton = openedPopup.querySelector('.popup__close');
-    if(evt.target === popupCloseButton || evt.target === openedPopup) {
-        closeModal(openedPopup);
+function handleCloseModalByOverlay(evt) {
+    if(evt.target === evt.currentTarget) {
+        closeModal(evt.currentTarget);
     };
 };
 
     //Закрытие попапа через Esc
 function handleCloseModalEsc (evt) {
-    const openedPopup = document.querySelector('.popup_is-opened');
     if(evt.code === 'Escape') {
+        const openedPopup = document.querySelector('.popup_is-opened');
         closeModal(openedPopup);
     }; 
 }; 
@@ -29,9 +28,9 @@ function handleCloseModalEsc (evt) {
     //Установка слушателей
 function setCloseModalByClickListeners(popupList) {
     popupList.forEach(popup => {
-      const closeButton = popup.querySelector('.popup__close');
-      closeButton.addEventListener('click', handleCloseModalEsc);
-      popup.addEventListener('click', handleCloseModalOverlayAndButton);
+        const closeButton = popup.querySelector('.popup__close');
+        closeButton.addEventListener('click', () => closeModal(popup)); 
+        popup.addEventListener('click', handleCloseModalByOverlay);
     });
   };
 

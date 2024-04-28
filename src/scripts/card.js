@@ -1,9 +1,9 @@
-import {onImageClick} from './index.js'
+import {onImageClick} from './index.js';
 
 const cardTemplate = document.querySelector('#card-template').content;
 
     //Создание карточки
-function createCard(cardData, deleteCard, handleLike) {
+function createCard(cardData, onDelete, onLike, onImageClick) {
     const cardElement = cardTemplate.querySelector('.card').cloneNode(true);
     const delButton = cardElement.querySelector('.card__delete-button');
     const cardImage = cardElement.querySelector('.card__image');
@@ -14,27 +14,21 @@ function createCard(cardData, deleteCard, handleLike) {
     cardImage.alt = cardData.name;
     cardTitle.textContent = cardData.name;
 
-    delButton.addEventListener('click', () => deleteCard(cardElement));
-
-    cardLike.addEventListener('click', (evt) => {
-        handleLike(cardLike, evt);
-    });
-
-    cardImage.addEventListener('click', () => {
-        onImageClick(cardImage, cardTitle);
-      });
+    delButton.addEventListener('click', () => onDelete(cardElement))
+    cardLike.addEventListener('click', () => onLike(cardLike))
+    cardImage.addEventListener('click', () => onImageClick(cardImage, cardTitle))
 
     return cardElement;
 };
 
     // Удаление карточки
-function deleteCard(cardElement) {
+function onDelete(cardElement) {
     cardElement.remove();
 };
 
     //Добавление и удаления лайка
-function handleLike(cardLike) {
+function onLike(cardLike) {
     cardLike.classList.toggle('card__like-button_is-active');
 };
 
-export {createCard, deleteCard, handleLike};
+export {createCard, onDelete, onLike};

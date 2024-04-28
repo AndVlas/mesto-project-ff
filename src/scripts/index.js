@@ -1,6 +1,6 @@
 import '/src/pages/index.css';
 import {initialCards} from './cards.js';
-import {createCard, deleteCard, handleLike} from './card.js';
+import {createCard, onDelete, onLike} from './card.js';
 import {openModal, setCloseModalByClickListeners, closeModal} from './modal.js';
 
   // DOM узлы
@@ -29,7 +29,7 @@ const popupCaption = imgPopup.querySelector('.popup__caption');
 
   // Вывод карточек на страницу
 initialCards.forEach((cardData) => {
-  cardsContainer.append(createCard(cardData, deleteCard, handleLike, onImageClick));
+  cardsContainer.append(createCard(cardData, onDelete, onLike, openImagePopup));
 });
 
 setCloseModalByClickListeners(popupList);
@@ -62,7 +62,7 @@ function handleAddCardFormSubmit(evt) {
         link: url
     }
 
-    cardsContainer.prepend(createCard(newCard, deleteCard, handleLike));
+    cardsContainer.prepend(createCard(newCard, onDelete, onLike, openImagePopup));
 
     cardForm.reset();
 
@@ -70,7 +70,7 @@ function handleAddCardFormSubmit(evt) {
 };
 
   // Увеличение изображения карточки
-function onImageClick(cardImage, cardTitle) {
+function openImagePopup(cardImage, cardTitle) {
 
   popupImage.src = cardImage.src;
   popupImage.alt = cardTitle.textContent;
@@ -96,4 +96,4 @@ cardForm.addEventListener('submit', (evt) => {
   handleAddCardFormSubmit(evt, cardForm)
 })
 
-export {onImageClick};
+export {openImagePopup as onImageClick};
