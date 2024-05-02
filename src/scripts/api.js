@@ -18,14 +18,12 @@ const apiResponse = (res) => {
 
 Promise.all([getUserData(), getCardData()])
     .then(([userData, cardList]) => {
-        console.log(userData)
         profileTitle.textContent = userData.name
         profileDesc.textContent = userData.about
         profileImage.style = 'background-image: url(' + userData.avatar + ');';
 
         const userId = userData._id
 
-        console.log(cardList)
         cardList.forEach((cardElement) => {
             cardsContainer.append(createCard(cardElement, onDelete, onLike, onImageClick, userId));
         });
