@@ -1,7 +1,4 @@
-import {createCard, onDelete, onLike} from './card.js';
-import {onImageClick, cardsContainer, profileTitle, profileDesc, profileImage} from './index.js';
-
-const config = {
+const apiConfig = {
     baseUrl: 'https://nomoreparties.co/v1/wff-cohort-11',
     headers: {
       authorization: '69f8f932-f9d5-4365-b19e-a4b0cea58a98',
@@ -9,96 +6,84 @@ const config = {
     }
 }
 
-const apiResponse = (res) => {
+const responseApi = (res) => {
     if(res.ok) {
         return res.json();
     }
     return Promise.reject(`Ошибка: ${res.status}`);
 }
 
-Promise.all([getUserData(), getCardData()])
-    .then(([userData, cardList]) => {
-        profileTitle.textContent = userData.name
-        profileDesc.textContent = userData.about
-        profileImage.style = 'background-image: url(' + userData.avatar + ');';
-
-        const userId = userData._id
-
-        cardList.forEach((cardElement) => {
-            cardsContainer.append(createCard(cardElement, onDelete, onLike, onImageClick, userId));
-        });
-});
-
 function getCardData () {
-    return fetch(`${config.baseUrl}/cards`, {
-    headers: config.headers,
+    return fetch(`${apiConfig.baseUrl}/cards`, {
+    headers: apiConfig.headers,
     })
-    .then(apiResponse)
+    .then(responseApi)
 }
+
 function addCard(name, link) {
-    return fetch(`${config.baseUrl}/cards`, {
+    return fetch(`${apiConfig.baseUrl}/cards`, {
     method: 'POST',
-    headers: config.headers,
+    headers: apiConfig.headers,
     body: JSON.stringify({
         name: name,
         link: link
     })
     })
-    .then(apiResponse)
+    .then(responseApi)
 }
 
 function addLike(cardElement) {
-    return fetch(`${config.baseUrl}/cards/likes/${cardElement._id}`, {
+    return fetch(`${apiConfig.baseUrl}/cards/likes/${cardElement._id}`, {
     method: 'PUT',
-    headers: config.headers,
+    headers: apiConfig.headers,
     })
-    .then(apiResponse)
+    .then(responseApi);
 }
 
 function deleteLike(cardElement) {
-    return fetch(`${config.baseUrl}/cards/likes/${cardElement._id}`, {
+    return fetch(`${apiConfig.baseUrl}/cards/likes/${cardElement._id}`, {
     method: 'DELETE',
-    headers: config.headers,
+    headers: apiConfig.headers,
     })
-    .then(apiResponse)
+    .then(responseApi)
 }
 
 function deleteCard(cardElement) {
-    return fetch(`${config.baseUrl}/cards/${cardElement._id}`, {
+    return fetch(`${apiConfig.baseUrl}/cards/${cardElement._id}`, {
     method: 'DELETE',
-    headers: config.headers,
+    headers: apiConfig.headers,
     })
-    .then(apiResponse)
+    .then(responseApi)
 }
 
 function getUserData() {
-    return fetch(`${config.baseUrl}/users/me `, {
-    headers: config.headers,
+    return fetch(`${apiConfig.baseUrl}/users/me `, {
+    headers: apiConfig.headers,
     })
-    .then(apiResponse)
+    .then(responseApi)
 }
 
 function editUserData(name, about) {
-    return fetch(`${config.baseUrl}/users/me `, {
+    return fetch(`${apiConfig.baseUrl}/users/me `, {
     method: 'PATCH',
-    headers: config.headers,
+    headers: apiConfig.headers,
     body: JSON.stringify({
         name: name,
         about: about
     })
     })
-    .then(apiResponse)
+    .then(responseApi)
 }
 
 function editUserProfile(link) {
-    return fetch(`${config.baseUrl}/users/me/avatar `, {
+    return fetch(`${apiConfig.baseUrl}/users/me/avatar `, {
     method: 'PATCH',
-    headers: config.headers,
+    headers: apiConfig.headers,
     body: JSON.stringify({
         avatar: link,
     })
     })
-    .then(apiResponse)
+    .then(responseApi)
 }
 
 export {getCardData, getUserData, addCard, editUserData, deleteCard, addLike, deleteLike, editUserProfile}

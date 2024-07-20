@@ -1,5 +1,5 @@
 import {deleteCardPopup} from './index.js';
-import { closeModal, openModal } from './modal.js';
+import {closeModal, openModal} from './modal.js';
 import {deleteCard, addLike, deleteLike} from './api.js';
 
 const cardTemplate = document.querySelector('#card-template').content;
@@ -12,8 +12,9 @@ function createCard(cardData, onDelete, onLike, onImageClick, userId) {
     const cardTitle = cardElement.querySelector('.card__title');
     const cardLike = cardElement.querySelector('.card__like-button');
     const cardLikeAmount = cardElement.querySelector('.card__like-amount');
+    const popupButton = deleteCardPopup.querySelector('.popup__button');
 
-    const cardId = cardData._id
+    const cardId = cardData
 
     cardImage.src = cardData.link;
     cardImage.alt = cardData.name;
@@ -22,11 +23,10 @@ function createCard(cardData, onDelete, onLike, onImageClick, userId) {
 
     if(cardData.owner._id === userId) {
         delButton.classList.add('card__delete-button_is-active');
-        delButton.addEventListener('submit', () => onDelete(cardElement, cardData))
+        delButton.addEventListener('click', () => openModal(deleteCardPopup));
     }
 
     let likesValue = cardData.likes ? cardData.likes.length : 0;
-
     let isLiked = cardData.likes ? cardData.likes.some(like => like._id === userId) : false;
 
     if(isLiked) {
@@ -35,22 +35,23 @@ function createCard(cardData, onDelete, onLike, onImageClick, userId) {
         cardLike.classList.remove('card__like-button_is-active');
     }
 
+    popupButton.addEventListener('click', () => onDelete(cardId, cardElement, deleteCardPopup));
     cardLike.addEventListener('click', () => onLike(isLiked, cardId, cardLike, cardLikeAmount, likesValue))
-
     cardImage.addEventListener('click', () => onImageClick(cardImage, cardTitle))
 
     return cardElement;
 };
 
     // Удаление карточки
-function onDelete(cardElement, cardData) {
-    openModal(deleteCardPopup)
-    const popupButton = deleteCardPopup.querySelector('.popup__button')
-    popupButton.addEventListener('submit', () => {
-        cardElement.remove();
-        deleteCard(cardData)
-        closeModal(deleteCardPopup);
-    })
+function onDelete(cardId, cardElement, deleteCardPopup) {
+    deleteCard(cardId)
+        .then(() => {
+            cardElement.remove();
+            closeModal(deleteCardPopup);  
+        })
+        .catch((err) => {
+            console.log(err)
+        })
 };
 
     //Добавление и удаления лайка
@@ -58,8 +59,8 @@ function onLike(isLiked, cardId, cardLike, cardLikeAmount, likesValue) {
 
     if(isLiked) {
         deleteLike(cardId)
-            .then(() => {
-                likesValue--;
+            .then((res) => {
+                likesValue = res.likes.length;
                 cardLikeAmount.textContent = likesValue;
                 cardLike.classList.remove('card__like-button_is-active');
             })
@@ -68,8 +69,8 @@ function onLike(isLiked, cardId, cardLike, cardLikeAmount, likesValue) {
             })
     } else {
         addLike(cardId)
-            .then(() => {
-                likesValue++;
+            .then((res) => {
+                likesValue = res.likes.length;
                 cardLikeAmount.textContent = likesValue;
                 cardLike.classList.add('card__like-button_is-active');
             })

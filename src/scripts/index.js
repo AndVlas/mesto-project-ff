@@ -1,7 +1,6 @@
 import '/src/pages/index.css';
 import {getCardData, getUserData, addCard, editUserData, editUserProfile} from './api.js'
 import {enableValidation, clearValidation} from './validation.js'
-import {initialCards} from './cards.js';
 import {createCard, onDelete, onLike} from './card.js';
 import {openModal, setCloseModalByClickListeners, closeModal} from './modal.js';
 
@@ -28,12 +27,11 @@ const cardNameInput = cardForm.querySelector('.popup__input_type_card-name');
 const cardUrlInput = cardForm.querySelector('.popup__input_type_url');
 const addPopupButton = cardForm.querySelector('.popup__button')
 const addCardPopup = document.querySelector('.popup_type_new-card');
+const deleteCardPopup = document.querySelector('.popup_type_delete-card');
 
 const imgPopup = document.querySelector('.popup_type_image');
 const popupImage = imgPopup.querySelector('.popup__image');
 const popupCaption = imgPopup.querySelector('.popup__caption');
-
-const deleteCardPopup = document.querySelector('.popup_type_delete-card');
 
 const avatarPopup = document.querySelector('.popup_type_new-avatar')
 const avatarImage = document.querySelector('.profile__image');
@@ -51,12 +49,29 @@ const validationConfig = ({
 }); 
 
 setCloseModalByClickListeners(popupList);
+enableValidation(validationConfig); 
 
 function loading (isLoading, buttonElement) {
-  if(isLoading === true) {
+  if(isLoading === false) {
     buttonElement.textContent = 'Сохранение...';
+  } else {
+    buttonElement.textContent = 'Сохранить';
   }
-}
+};
+
+  //Отрисовка карт
+Promise.all([getUserData(), getCardData()])
+  .then(([userData, cardList]) => {
+      profileTitle.textContent = userData.name
+      profileDesc.textContent = userData.about
+      profileImage.style = 'background-image: url(' + userData.avatar + ');';
+
+      const userId = userData._id
+
+      cardList.forEach((cardElement) => {
+          cardsContainer.append(createCard(cardElement, onDelete, onLike, openImagePopup, userId));
+      });
+});
 
   // Попап редактирования
 function openEditProfilePopup (popup) {
@@ -123,7 +138,6 @@ function handleChangeAvatar (evt) {
 
   const avatarLink = avatarUrlInput.value
 
-  avatarImage.src = avatarLink
   editUserProfile(avatarLink)
     .then((res) => {
       avatarImage.src = res.avatarImage;
@@ -150,8 +164,7 @@ function openImagePopup(cardImage, cardTitle) {
   //Слушатели событий
 editButton.addEventListener('click', () => {
   openEditProfilePopup(editPopup);
-  clearValidation (userForm);
-  enableValidation(); 
+  clearValidation (userForm, validationConfig);
 });
 
 userForm.addEventListener('submit', (evt) => {
@@ -160,8 +173,7 @@ userForm.addEventListener('submit', (evt) => {
 
 addButton.addEventListener('click', () => {
   openModal(addPopup);
-  clearValidation (cardForm);
-  enableValidation(); 
+  clearValidation (cardForm, validationConfig);
 });
 
 cardForm.addEventListener('submit', (evt) => {
@@ -170,11 +182,10 @@ cardForm.addEventListener('submit', (evt) => {
 
 avatarImage.addEventListener('click', () => {
   openModal(avatarPopup)
-  clearValidation(avatarForm);
-  enableValidation();
+  clearValidation(avatarForm, validationConfig);
   avatarForm.reset()
 })
 
-avatarPopupButton.addEventListener('click', handleChangeAvatar);
+avatarForm.addEventListener('submit', handleChangeAvatar);
 
-export {openImagePopup as onImageClick, validationConfig, handleEditProfileFormSubmit, deleteCardPopup, cardsContainer, profileTitle, profileDesc, profileImage};
+export {openImagePopup as onImageClick, handleEditProfileFormSubmit, deleteCardPopup, cardsContainer, profileTitle, profileDesc, profileImage};
