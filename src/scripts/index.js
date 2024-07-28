@@ -61,16 +61,19 @@ function loading (isLoading, buttonElement) {
 
   //Отрисовка карт
 Promise.all([getUserData(), getCardData()])
-  .then(([userData, cardList]) => {
-      profileTitle.textContent = userData.name
-      profileDesc.textContent = userData.about
-      profileImage.style = 'background-image: url(' + userData.avatar + ');';
+.then(([userData, cardList]) => {
+    profileTitle.textContent = userData.name
+    profileDesc.textContent = userData.about
+    profileImage.style = 'background-image: url(' + userData.avatar + ');';
+  
+    const userId = userData._id
 
-      const userId = userData._id
-
-      cardList.forEach((cardElement) => {
-          cardsContainer.append(createCard(cardElement, onDelete, onLike, openImagePopup, userId));
-      });
+    cardList.forEach((cardElement) => {
+        cardsContainer.append(createCard(cardElement, onDelete, onLike, openImagePopup, userId));
+    });
+})
+.catch((err) => {
+  console.log(err);
 });
 
   // Попап редактирования
@@ -139,17 +142,19 @@ function handleChangeAvatar (evt) {
   const avatarLink = avatarUrlInput.value
 
   editUserProfile(avatarLink)
-    .then((res) => {
-      avatarImage.src = res.avatarImage;
+    .then(() => {
+      avatarImage.style.backgroundImage = `url(${avatarUrlInput.value})`;
       closeModal(avatarPopup)
     })
+
     .catch((err) => {
       console.log(err)
     })
+
     .finally(() => {
       loading(true, avatarPopupButton)
     })
-}
+};
 
   // Увеличение изображения карточки
 function openImagePopup(cardImage, cardTitle) {
@@ -168,8 +173,8 @@ editButton.addEventListener('click', () => {
 });
 
 userForm.addEventListener('submit', (evt) => {
-  handleEditProfileFormSubmit(evt, userForm);
-})
+  handleEditProfileFormSubmit(evt);
+});
 
 addButton.addEventListener('click', () => {
   openModal(addPopup);
@@ -177,15 +182,17 @@ addButton.addEventListener('click', () => {
 });
 
 cardForm.addEventListener('submit', (evt) => {
-  handleAddCardFormSubmit(evt, cardForm);
-})
+  handleAddCardFormSubmit(evt);
+});
 
 avatarImage.addEventListener('click', () => {
   openModal(avatarPopup)
   clearValidation(avatarForm, validationConfig);
   avatarForm.reset()
-})
+});
 
-avatarForm.addEventListener('submit', handleChangeAvatar);
+avatarPopupButton.addEventListener('click', (evt) => {
+  handleChangeAvatar(evt);
+});
 
 export {openImagePopup as onImageClick, handleEditProfileFormSubmit, deleteCardPopup, cardsContainer, profileTitle, profileDesc, profileImage};

@@ -23,8 +23,17 @@ function createCard(cardData, onDelete, onLike, onImageClick, userId) {
 
     if(cardData.owner._id === userId) {
         delButton.classList.add('card__delete-button_is-active');
-        delButton.addEventListener('click', () => openModal(deleteCardPopup));
-    }
+        delButton.addEventListener('click', (evt) => {
+            openModal(deleteCardPopup);
+            let evtCardId = evt.target.offsetParent;
+    
+            deleteCardPopup.addEventListener('close', () => {
+                evtCardId = undefined;
+              });
+
+            popupButton.addEventListener('click', () => onDelete(evtCardId, cardId, deleteCardPopup));
+        });
+    };
 
     let likesValue = cardData.likes ? cardData.likes.length : 0;
     let isLiked = cardData.likes ? cardData.likes.some(like => like._id === userId) : false;
@@ -35,7 +44,6 @@ function createCard(cardData, onDelete, onLike, onImageClick, userId) {
         cardLike.classList.remove('card__like-button_is-active');
     }
 
-    popupButton.addEventListener('click', () => onDelete(cardId, cardElement, deleteCardPopup));
     cardLike.addEventListener('click', () => onLike(isLiked, cardId, cardLike, cardLikeAmount, likesValue))
     cardImage.addEventListener('click', () => onImageClick(cardImage, cardTitle))
 
@@ -43,11 +51,11 @@ function createCard(cardData, onDelete, onLike, onImageClick, userId) {
 };
 
     // Удаление карточки
-function onDelete(cardId, cardElement, deleteCardPopup) {
+function onDelete(evtCardId, cardId, deleteCardPopup) {
     deleteCard(cardId)
         .then(() => {
-            cardElement.remove();
-            closeModal(deleteCardPopup);  
+            evtCardId.remove();
+            closeModal(deleteCardPopup);
         })
         .catch((err) => {
             console.log(err)

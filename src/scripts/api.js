@@ -18,6 +18,9 @@ function getCardData () {
     headers: apiConfig.headers,
     })
     .then(responseApi)
+    .catch((err) => {
+        console.log(err);
+      });
 }
 
 function addCard(name, link) {
@@ -30,6 +33,9 @@ function addCard(name, link) {
     })
     })
     .then(responseApi)
+    .catch((err) => {
+        console.log(err);
+      });
 }
 
 function addLike(cardElement) {
@@ -37,7 +43,10 @@ function addLike(cardElement) {
     method: 'PUT',
     headers: apiConfig.headers,
     })
-    .then(responseApi);
+    .then(responseApi)
+    .catch((err) => {
+        console.log(err);
+      });
 }
 
 function deleteLike(cardElement) {
@@ -46,6 +55,9 @@ function deleteLike(cardElement) {
     headers: apiConfig.headers,
     })
     .then(responseApi)
+    .catch((err) => {
+        console.log(err);
+      });
 }
 
 function deleteCard(cardElement) {
@@ -54,6 +66,9 @@ function deleteCard(cardElement) {
     headers: apiConfig.headers,
     })
     .then(responseApi)
+    .catch((err) => {
+        console.log(err);
+      });
 }
 
 function getUserData() {
@@ -61,6 +76,9 @@ function getUserData() {
     headers: apiConfig.headers,
     })
     .then(responseApi)
+    .catch((err) => {
+        console.log(err);
+      });
 }
 
 function editUserData(name, about) {
@@ -73,6 +91,9 @@ function editUserData(name, about) {
     })
     })
     .then(responseApi)
+    .catch((err) => {
+        console.log(err);
+      });
 }
 
 function editUserProfile(link) {
@@ -84,6 +105,9 @@ function editUserProfile(link) {
     })
     })
     .then(responseApi)
+    .catch((err) => {
+        console.log(err);
+      });
 }
 
 export {getCardData, getUserData, addCard, editUserData, deleteCard, addLike, deleteLike, editUserProfile}
