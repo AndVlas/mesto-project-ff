@@ -14,8 +14,6 @@ function createCard(cardData, onDelete, onLike, onImageClick, userId) {
     const cardLikeAmount = cardElement.querySelector('.card__like-amount');
     const popupButton = deleteCardPopup.querySelector('.popup__button');
 
-    const cardId = cardData
-
     cardImage.src = cardData.link;
     cardImage.alt = cardData.name;
     cardTitle.textContent = cardData.name;
@@ -25,14 +23,12 @@ function createCard(cardData, onDelete, onLike, onImageClick, userId) {
         delButton.classList.add('card__delete-button_is-active');
         delButton.addEventListener('click', (evt) => {
             openModal(deleteCardPopup);
-            let evtCardId = evt.target.offsetParent;
-    
-            deleteCardPopup.addEventListener('close', () => {
-                evtCardId = undefined;
-              });
-
-            popupButton.addEventListener('click', () => onDelete(evtCardId, cardId, deleteCardPopup));
+            const evtCard = evt.target.offsetParent;
+            window.globalEvtCard = evtCard;
+            const cardId = cardData;
+            window.globalCardId = cardId
         });
+        popupButton.addEventListener('click', () => onDelete(globalEvtCard, globalCardId, deleteCardPopup));
     };
 
     let likesValue = cardData.likes ? cardData.likes.length : 0;
@@ -44,17 +40,17 @@ function createCard(cardData, onDelete, onLike, onImageClick, userId) {
         cardLike.classList.remove('card__like-button_is-active');
     }
 
-    cardLike.addEventListener('click', () => onLike(isLiked, cardId, cardLike, cardLikeAmount, likesValue))
+    cardLike.addEventListener('click', () => onLike(isLiked, cardData, cardLike, cardLikeAmount, likesValue))
     cardImage.addEventListener('click', () => onImageClick(cardImage, cardTitle))
 
     return cardElement;
 };
 
     // Удаление карточки
-function onDelete(evtCardId, cardId, deleteCardPopup) {
-    deleteCard(cardId)
+function onDelete(globalEvtCard, globalCardId, deleteCardPopup) {
+    deleteCard(globalCardId)
         .then(() => {
-            evtCardId.remove();
+            globalEvtCard.remove();
             closeModal(deleteCardPopup);
         })
         .catch((err) => {
@@ -62,11 +58,16 @@ function onDelete(evtCardId, cardId, deleteCardPopup) {
         })
 };
 
+// function onDelete(globalEvtCard, deleteCardPopup) {
+//     globalEvtCard.remove();
+//     closeModal(deleteCardPopup);
+// }
+
     //Добавление и удаления лайка
-function onLike(isLiked, cardId, cardLike, cardLikeAmount, likesValue) {
+function onLike(isLiked, cardData, cardLike, cardLikeAmount, likesValue) {
 
     if(isLiked) {
-        deleteLike(cardId)
+        deleteLike(cardData)
             .then((res) => {
                 likesValue = res.likes.length;
                 cardLikeAmount.textContent = likesValue;
@@ -76,7 +77,7 @@ function onLike(isLiked, cardId, cardLike, cardLikeAmount, likesValue) {
                 console.log(err)
             })
     } else {
-        addLike(cardId)
+        addLike(cardData)
             .then((res) => {
                 likesValue = res.likes.length;
                 cardLikeAmount.textContent = likesValue;
