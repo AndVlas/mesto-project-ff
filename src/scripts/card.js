@@ -1,18 +1,15 @@
-import {deleteCardPopup} from './index.js';
-import {closeModal, openModal} from './modal.js';
-import {deleteCard, addLike, deleteLike} from './api.js';
+import {addLike, deleteLike} from './api.js';
 
 const cardTemplate = document.querySelector('#card-template').content;
 
     //Создание карточки
-function createCard(cardData, onDelete, onLike, onImageClick, userId) {
+function createCard(cardData, onLike, onImageClick, openDeleteCardPopup, userId) {
     const cardElement = cardTemplate.querySelector('.card').cloneNode(true);
     const delButton = cardElement.querySelector('.card__delete-button');
     const cardImage = cardElement.querySelector('.card__image');
     const cardTitle = cardElement.querySelector('.card__title');
     const cardLike = cardElement.querySelector('.card__like-button');
     const cardLikeAmount = cardElement.querySelector('.card__like-amount');
-    const popupButton = deleteCardPopup.querySelector('.popup__button');
 
     cardImage.src = cardData.link;
     cardImage.alt = cardData.name;
@@ -21,14 +18,7 @@ function createCard(cardData, onDelete, onLike, onImageClick, userId) {
 
     if(cardData.owner._id === userId) {
         delButton.classList.add('card__delete-button_is-active');
-        delButton.addEventListener('click', (evt) => {
-            openModal(deleteCardPopup);
-            const evtCard = evt.target.offsetParent;
-            window.globalEvtCard = evtCard;
-            const cardId = cardData;
-            window.globalCardId = cardId
-        });
-        popupButton.addEventListener('click', () => onDelete(globalEvtCard, globalCardId, deleteCardPopup));
+        delButton.addEventListener('click', (evt) => openDeleteCardPopup(evt, cardData));
     };
 
     let likesValue = cardData.likes ? cardData.likes.length : 0;
@@ -45,23 +35,6 @@ function createCard(cardData, onDelete, onLike, onImageClick, userId) {
 
     return cardElement;
 };
-
-    // Удаление карточки
-function onDelete(globalEvtCard, globalCardId, deleteCardPopup) {
-    deleteCard(globalCardId)
-        .then(() => {
-            globalEvtCard.remove();
-            closeModal(deleteCardPopup);
-        })
-        .catch((err) => {
-            console.log(err)
-        })
-};
-
-// function onDelete(globalEvtCard, deleteCardPopup) {
-//     globalEvtCard.remove();
-//     closeModal(deleteCardPopup);
-// }
 
     //Добавление и удаления лайка
 function onLike(isLiked, cardData, cardLike, cardLikeAmount, likesValue) {
@@ -89,4 +62,4 @@ function onLike(isLiked, cardData, cardLike, cardLikeAmount, likesValue) {
     }
 };
 
-export {createCard, onDelete, onLike};
+export {createCard, onLike};

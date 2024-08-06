@@ -1,7 +1,7 @@
 import '/src/pages/index.css';
-import {getCardData, getUserData, addCard, editUserData, editUserProfile} from './api.js'
+import {getCardData, getUserData, addCard, deleteCard, editUserData, editUserProfile} from './api.js'
 import {enableValidation, clearValidation} from './validation.js'
-import {createCard, onDelete, onLike} from './card.js';
+import {createCard, onLike} from './card.js';
 import {openModal, setCloseModalByClickListeners, closeModal} from './modal.js';
 
   // DOM узлы
@@ -11,30 +11,29 @@ const cardForm = document.forms['new-place'];
 const avatarForm = document.forms['new-avatar'];
 const popupList = document.querySelectorAll('.popup');
 
-const editButton = document.querySelector('.profile__edit-button');
-const editPopup = document.querySelector('.popup_type_edit');
 const nameInput = userForm.querySelector('.popup__input_type_name');
 const jobInput = userForm.querySelector('.popup__input_type_description');
-const profilePopupButton = userForm.querySelector('.popup__button')
+const profilePopupButton = userForm.querySelector('.popup__button');
 const profileTitle = document.querySelector('.profile__title');
 const profileDesc = document.querySelector('.profile__description');
 const profilePopup = document.querySelector('.popup_type_edit');
 const profileImage = document.querySelector('.profile__image');
+const editButton = document.querySelector('.profile__edit-button');
 
-const addButton = document.querySelector('.profile__add-button');
-const addPopup = document.querySelector('.popup_type_new-card');
 const cardNameInput = cardForm.querySelector('.popup__input_type_card-name');
 const cardUrlInput = cardForm.querySelector('.popup__input_type_url');
-const addPopupButton = cardForm.querySelector('.popup__button')
+const addPopupButton = cardForm.querySelector('.popup__button');
+const addButton = document.querySelector('.profile__add-button');
 const addCardPopup = document.querySelector('.popup_type_new-card');
+
 const deleteCardPopup = document.querySelector('.popup_type_delete-card');
+const deleteCardPopupButton = deleteCardPopup.querySelector('.popup__button');
 
 const imgPopup = document.querySelector('.popup_type_image');
 const popupImage = imgPopup.querySelector('.popup__image');
 const popupCaption = imgPopup.querySelector('.popup__caption');
 
 const avatarPopup = document.querySelector('.popup_type_new-avatar')
-const avatarImage = document.querySelector('.profile__image');
 const avatarPopupButton = avatarPopup.querySelector('.popup__button')
 const avatarUrlInput = avatarPopup.querySelector('.popup__input_type_url');
 
@@ -61,20 +60,21 @@ function loading (isLoading, buttonElement) {
 
   //Отрисовка карт
 Promise.all([getUserData(), getCardData()])
-.then(([userData, cardList]) => {
-    profileTitle.textContent = userData.name
-    profileDesc.textContent = userData.about
-    profileImage.style = 'background-image: url(' + userData.avatar + ');';
-  
-    const userId = userData._id
+  .then(([userData, cardList]) => {
+      profileTitle.textContent = userData.name
+      profileDesc.textContent = userData.about
+      profileImage.style = 'background-image: url(' + userData.avatar + ');';
 
-    cardList.forEach((cardElement) => {
-        cardsContainer.append(createCard(cardElement, onDelete, onLike, openImagePopup, userId));
-    });
-})
-.catch((err) => {
-  console.log(err);
-});
+      const userId = userData._id;
+
+      cardList.forEach((cardData) => {
+        cardsContainer.append(createCard(cardData, onLike, openImagePopup, openDeleteCardPopup, userId));
+      });
+
+  })
+  .catch((err) => {
+    console.log(err);
+  });
 
   // Попап редактирования
 function openEditProfilePopup (popup) {
@@ -119,7 +119,7 @@ function handleAddCardFormSubmit(evt) {
 
     addCard(name, url)
     .then((cardData) => {
-      cardsContainer.prepend(createCard(cardData, onDelete, onLike, openImagePopup, cardData.owner['_id']));
+      cardsContainer.prepend(createCard(cardData, onLike, openImagePopup, openDeleteCardPopup, cardData.owner['_id']));
       cardForm.reset();
       closeModal(addCardPopup);
     })
@@ -133,6 +133,28 @@ function handleAddCardFormSubmit(evt) {
     })
 };
 
+  // Попап удаления карточки
+function openDeleteCardPopup(evt, cardData) {
+  const evtCard = evt.target.offsetParent;
+  window.globalEvtCard = evtCard;
+  const cardId = cardData;
+  window.globalCardId = cardId
+
+  openModal(deleteCardPopup);
+}
+
+  // Удаление карточки
+function onDelete(globalEvtCard, globalCardId, deleteCardPopup) {
+  deleteCard(globalCardId)
+    .then(() => {
+      globalEvtCard.remove();
+      closeModal(deleteCardPopup);
+    })
+    .catch((err) => {
+      console.log(err)
+    })
+};
+
   //Попап изменения аватара
 function handleChangeAvatar (evt) {
   evt.preventDefault();
@@ -143,7 +165,7 @@ function handleChangeAvatar (evt) {
 
   editUserProfile(avatarLink)
     .then(() => {
-      avatarImage.style.backgroundImage = `url(${avatarUrlInput.value})`;
+      profileImage.style.backgroundImage = `url(${avatarUrlInput.value})`;
       closeModal(avatarPopup)
     })
 
@@ -168,7 +190,7 @@ function openImagePopup(cardImage, cardTitle) {
 
   //Слушатели событий
 editButton.addEventListener('click', () => {
-  openEditProfilePopup(editPopup);
+  openEditProfilePopup(profilePopup);
   clearValidation (userForm, validationConfig);
 });
 
@@ -177,7 +199,7 @@ userForm.addEventListener('submit', (evt) => {
 });
 
 addButton.addEventListener('click', () => {
-  openModal(addPopup);
+  openModal(addCardPopup);
   clearValidation (cardForm, validationConfig);
 });
 
@@ -185,7 +207,7 @@ cardForm.addEventListener('submit', (evt) => {
   handleAddCardFormSubmit(evt);
 });
 
-avatarImage.addEventListener('click', () => {
+profileImage.addEventListener('click', () => {
   openModal(avatarPopup)
   clearValidation(avatarForm, validationConfig);
   avatarForm.reset()
@@ -195,4 +217,8 @@ avatarPopupButton.addEventListener('click', (evt) => {
   handleChangeAvatar(evt);
 });
 
-export {openImagePopup as onImageClick, handleEditProfileFormSubmit, deleteCardPopup, cardsContainer, profileTitle, profileDesc, profileImage};
+deleteCardPopupButton.addEventListener('click', () => {
+  onDelete(globalEvtCard, globalCardId, deleteCardPopup);
+});
+
+export {openImagePopup as onImageClick};
